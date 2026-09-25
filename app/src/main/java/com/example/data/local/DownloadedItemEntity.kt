@@ -1,11 +1,19 @@
 package com.example.data.local
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.model.DownloadedItem
 import com.example.model.PlatformType
 
-@Entity(tableName = "downloaded_items")
+@Entity(
+  tableName = "downloaded_items",
+  indices = [
+    Index(value = ["timestamp"]),
+    Index(value = ["isAudioOnly"]),
+    Index(value = ["title"])
+  ]
+)
 data class DownloadedItemEntity(
   @PrimaryKey
   val id: String,

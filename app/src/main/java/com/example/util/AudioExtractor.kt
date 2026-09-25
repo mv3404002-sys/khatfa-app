@@ -90,7 +90,7 @@ object AudioExtractor {
         256 * 1024
       }
 
-      val buffer = ByteBuffer.allocate(maxBufferSize)
+      val buffer = ByteBuffer.allocateDirect(maxBufferSize)
       val bufferInfo = MediaCodec.BufferInfo()
 
       while (true) {

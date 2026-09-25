@@ -156,9 +156,20 @@ fun InternalMediaPlayerModal(
   }
 
   val exoPlayer = remember(context) {
-    ExoPlayer.Builder(context).build().apply {
-      repeatMode = Player.REPEAT_MODE_OFF
-    }
+    val loadControl = androidx.media3.exoplayer.DefaultLoadControl.Builder()
+      .setBufferDurationsMs(
+        15_000,
+        50_000,
+        250,
+        500
+      )
+      .build()
+
+    ExoPlayer.Builder(context)
+      .setLoadControl(loadControl)
+      .build().apply {
+        repeatMode = Player.REPEAT_MODE_OFF
+      }
   }
 
   var isPlaying by remember { mutableStateOf(false) }
@@ -285,7 +296,7 @@ fun InternalMediaPlayerModal(
   // Pre-calculate guaranteed navigation bar clearance from caller window insets
   val callerNavBars = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
   val callerSystemBars = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-  val guaranteedBottomMargin = maxOf(callerNavBars, callerSystemBars, 48.dp) + 16.dp
+  val guaranteedBottomMargin = maxOf(callerNavBars, callerSystemBars, 56.dp) + 36.dp
 
   Dialog(
     onDismissRequest = onDismiss,
@@ -309,7 +320,7 @@ fun InternalMediaPlayerModal(
 
     val dialogNavBottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val dialogSystemBottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-    val effectiveBottomPadding = maxOf(dialogNavBottom, dialogSystemBottom, guaranteedBottomMargin)
+    val effectiveBottomPadding = maxOf(dialogNavBottom, dialogSystemBottom, guaranteedBottomMargin) + 16.dp
 
     if (isInPip) {
       Box(
@@ -711,7 +722,8 @@ fun InternalMediaPlayerModal(
           Column(
             modifier = Modifier
               .fillMaxWidth()
-              .padding(horizontal = 14.dp, vertical = 8.dp),
+              .padding(horizontal = 14.dp)
+              .padding(top = 4.dp, bottom = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
           ) {

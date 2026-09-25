@@ -93,6 +93,8 @@ fun HomeScreen(
   val downloadStatusDetail by viewModel.downloadStatusDetail.collectAsState()
   val backendStatus by viewModel.backendStatus.collectAsState()
   val language by viewModel.language.collectAsState()
+  val autoAnalyzeOnPaste by viewModel.autoAnalyzeOnPaste.collectAsState()
+  val autoExportToGallery by viewModel.autoExportToGallery.collectAsState()
 
   LazyColumn(
     modifier = modifier
@@ -134,6 +136,77 @@ fun HomeScreen(
         },
         onSnatch = { viewModel.snatchVideo() }
       )
+    }
+
+    // Quick Options & Automation Toggles in Home
+    item {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        // Quick Auto-Paste Chip
+        Surface(
+          shape = RoundedCornerShape(20.dp),
+          color = if (autoAnalyzeOnPaste) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+          border = androidx.compose.foundation.BorderStroke(1.dp, if (autoAnalyzeOnPaste) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+          modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { viewModel.setAutoAnalyzeOnPaste(!autoAnalyzeOnPaste) }
+            .testTag("quick_toggle_auto_paste")
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.Bolt,
+              contentDescription = null,
+              tint = if (autoAnalyzeOnPaste) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(15.dp)
+            )
+            Text(
+              text = if (language == AppLanguage.ARABIC) "تحليل تلقائي" else if (language == AppLanguage.FRENCH) "Analyse auto" else "Auto-Analyze",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = if (autoAnalyzeOnPaste) FontWeight.Bold else FontWeight.Normal,
+              color = if (autoAnalyzeOnPaste) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          }
+        }
+
+        // Quick Gallery Export Chip
+        Surface(
+          shape = RoundedCornerShape(20.dp),
+          color = if (autoExportToGallery) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+          border = androidx.compose.foundation.BorderStroke(1.dp, if (autoExportToGallery) MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
+          modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { viewModel.setAutoExportToGallery(!autoExportToGallery) }
+            .testTag("quick_toggle_auto_gallery")
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.CloudDownload,
+              contentDescription = null,
+              tint = if (autoExportToGallery) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(15.dp)
+            )
+            Text(
+              text = if (language == AppLanguage.ARABIC) "حفظ بالمعرض" else if (language == AppLanguage.FRENCH) "Vers galerie" else "To Gallery",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = if (autoExportToGallery) FontWeight.Bold else FontWeight.Normal,
+              color = if (autoExportToGallery) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          }
+        }
+      }
     }
 
     // Main Content: Video Preview Card, Reassuring Analyzing Card, or Minimal Clean Ready Card

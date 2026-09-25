@@ -31,10 +31,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.BrightnessAuto
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudDownload
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Diamond
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FormatSize
@@ -100,13 +104,22 @@ fun SettingsScreen(
   val cacheSize by viewModel.cacheSize.collectAsState()
   val backendStatus by viewModel.backendStatus.collectAsState()
   val fontScale by viewModel.fontSizeScale.collectAsState()
+  val wifiOnly by viewModel.wifiOnly.collectAsState()
+  val notificationsEnabled by viewModel.notificationsEnabled.collectAsState()
+  val autoAnalyzeOnPaste by viewModel.autoAnalyzeOnPaste.collectAsState()
+  val autoExportToGallery by viewModel.autoExportToGallery.collectAsState()
+  val defaultQuality by viewModel.defaultQuality.collectAsState()
+  val hapticFeedbackEnabled by viewModel.hapticFeedbackEnabled.collectAsState()
 
   // Interactive Dialog & Expand States
   var showClearCacheDialog by remember { mutableStateOf(false) }
+  var showClearHistoryDialog by remember { mutableStateOf(false) }
+  var showDefaultQualityDialog by remember { mutableStateOf(false) }
   var showPrivacyDialog by remember { mutableStateOf(false) }
   var isAppearanceExpanded by remember { mutableStateOf(false) }
   var isFontSizeExpanded by remember { mutableStateOf(false) }
   var isLanguageExpanded by remember { mutableStateOf(false) }
+  var isDownloadSettingsExpanded by remember { mutableStateOf(true) }
   var isCacheExpanded by remember { mutableStateOf(false) }
   var isAboutExpanded by remember { mutableStateOf(false) }
 
@@ -120,7 +133,7 @@ fun SettingsScreen(
     // Header Title with Collapse/Expand All action
     item {
       val allExpanded = isAppearanceExpanded && isFontSizeExpanded && isLanguageExpanded &&
-          isCacheExpanded && isAboutExpanded
+          isDownloadSettingsExpanded && isCacheExpanded && isAboutExpanded
 
       Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -172,6 +185,7 @@ fun SettingsScreen(
               isAppearanceExpanded = newState
               isFontSizeExpanded = newState
               isLanguageExpanded = newState
+              isDownloadSettingsExpanded = newState
               isCacheExpanded = newState
               isAboutExpanded = newState
             }
@@ -396,7 +410,85 @@ fun SettingsScreen(
       }
     }
 
-    // 4. Cache & Storage (الذاكرة المؤقتة والتخزين)
+    // 4. Download Preferences & Automation (خيارات التنزيل والأتمتة)
+    item {
+      ExpandableSettingCard(
+        title = AppStrings.downloadPreferencesSection(language),
+        subtitle = AppStrings.downloadPreferencesSubtitle(language),
+        icon = Icons.Default.CloudDownload,
+        isExpanded = isDownloadSettingsExpanded,
+        onToggleExpand = { isDownloadSettingsExpanded = !isDownloadSettingsExpanded },
+        modifier = Modifier.testTag("setting_card_download_preferences")
+      ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+          // Auto-analyze on Paste
+          SettingSwitchRow(
+            icon = Icons.Default.ContentPaste,
+            title = AppStrings.autoAnalyzeOnPasteTitle(language),
+            subtitle = AppStrings.autoAnalyzeOnPasteSubtitle(language),
+            checked = autoAnalyzeOnPaste,
+            onCheckedChange = { viewModel.setAutoAnalyzeOnPaste(it) }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+          // Auto-Save to Gallery
+          SettingSwitchRow(
+            icon = Icons.Default.Folder,
+            title = AppStrings.autoExportGalleryTitle(language),
+            subtitle = AppStrings.autoExportGallerySubtitle(language),
+            checked = autoExportToGallery,
+            onCheckedChange = { viewModel.setAutoExportToGallery(it) }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+          // Default Download Quality
+          SettingDetailRow(
+            icon = Icons.Default.HighQuality,
+            title = AppStrings.defaultQualityTitle(language),
+            subtitle = defaultQuality,
+            action = if (language == AppLanguage.ARABIC) "تحديد" else if (language == AppLanguage.FRENCH) "Choisir" else "Select",
+            onClick = { showDefaultQualityDialog = true }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+          // Wi-Fi Only Download
+          SettingSwitchRow(
+            icon = Icons.Default.Wifi,
+            title = AppStrings.wifiOnlyTitle(language),
+            subtitle = AppStrings.wifiOnlySubtitle(language),
+            checked = wifiOnly,
+            onCheckedChange = { viewModel.setWifiOnly(it) }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+          // Download Notifications
+          SettingSwitchRow(
+            icon = Icons.Default.Notifications,
+            title = AppStrings.notificationsTitle(language),
+            subtitle = AppStrings.notificationsSubtitle(language),
+            checked = notificationsEnabled,
+            onCheckedChange = { viewModel.setNotificationsEnabled(it) }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+          // Haptic Touch Feedback
+          SettingSwitchRow(
+            icon = Icons.Default.Bolt,
+            title = AppStrings.hapticFeedbackTitle(language),
+            subtitle = AppStrings.hapticFeedbackSubtitle(language),
+            checked = hapticFeedbackEnabled,
+            onCheckedChange = { viewModel.setHapticFeedbackEnabled(it) }
+          )
+        }
+      }
+    }
+
+    // 5. Cache & Storage (الذاكرة المؤقتة والتخزين)
     item {
       ExpandableSettingCard(
         title = AppStrings.cacheSection(language),
@@ -413,6 +505,16 @@ fun SettingsScreen(
             subtitle = AppStrings.cacheOccupied(language, cacheSize),
             action = AppStrings.cleanButton(language),
             onClick = { showClearCacheDialog = true }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
+          SettingDetailRow(
+            icon = Icons.Default.Delete,
+            title = AppStrings.clearAllHistoryTitle(language),
+            subtitle = AppStrings.clearAllHistorySubtitle(language),
+            action = if (language == AppLanguage.ARABIC) "مسح" else if (language == AppLanguage.FRENCH) "Vider" else "Clear",
+            onClick = { showClearHistoryDialog = true }
           )
         }
       }
@@ -709,6 +811,135 @@ fun SettingsScreen(
             text = AppStrings.privacyAgreeButton(language),
             fontWeight = FontWeight.Bold
           )
+        }
+      }
+    )
+  }
+
+  // --- INTERACTIVE DIALOG: Default Download Quality Selector ---
+  if (showDefaultQualityDialog) {
+    val qualityOptions = listOf(
+      "أفضل جودة للهاتف (Best)" to "أفضل جودة للهاتف (Best)",
+      "جودة HD (720p / 1080p)" to "HD",
+      "صوت فقط (Audio M4A)" to "صوت فقط"
+    )
+
+    AlertDialog(
+      onDismissRequest = { showDefaultQualityDialog = false },
+      icon = {
+        Icon(
+          imageVector = Icons.Default.HighQuality,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(32.dp)
+        )
+      },
+      title = {
+        Text(
+          text = AppStrings.defaultQualityTitle(language),
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold
+        )
+      },
+      text = {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Text(
+            text = AppStrings.defaultQualitySubtitle(language),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+          )
+          qualityOptions.forEach { (label, key) ->
+            val isSelected = defaultQuality.contains(key, ignoreCase = true)
+            Surface(
+              shape = RoundedCornerShape(10.dp),
+              color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+              border = androidx.compose.foundation.BorderStroke(
+                1.dp,
+                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+              ),
+              modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .clickable {
+                  viewModel.setDefaultQuality(label)
+                  showDefaultQualityDialog = false
+                }
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+              ) {
+                RadioButton(
+                  selected = isSelected,
+                  onClick = {
+                    viewModel.setDefaultQuality(label)
+                    showDefaultQualityDialog = false
+                  },
+                  colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                )
+                Text(
+                  text = label,
+                  style = MaterialTheme.typography.bodyMedium,
+                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                  color = MaterialTheme.colorScheme.onSurface
+                )
+              }
+            }
+          }
+        }
+      },
+      confirmButton = {
+        TextButton(onClick = { showDefaultQualityDialog = false }) {
+          Text(AppStrings.cancelButton(language))
+        }
+      }
+    )
+  }
+
+  // --- INTERACTIVE DIALOG: Clear All History Confirmation ---
+  if (showClearHistoryDialog) {
+    AlertDialog(
+      onDismissRequest = { showClearHistoryDialog = false },
+      icon = {
+        Icon(
+          imageVector = Icons.Default.Delete,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.error,
+          modifier = Modifier.size(32.dp)
+        )
+      },
+      title = {
+        Text(
+          text = AppStrings.clearAllHistoryTitle(language),
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold
+        )
+      },
+      text = {
+        Text(
+          text = AppStrings.clearAllHistoryConfirm(language),
+          style = MaterialTheme.typography.bodyMedium,
+          color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+      },
+      confirmButton = {
+        Button(
+          onClick = {
+            viewModel.clearAllHistory(deleteFiles = true)
+            showClearHistoryDialog = false
+          },
+          colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+          Text(
+            text = if (language == AppLanguage.ARABIC) "مسح وحذف الكل" else if (language == AppLanguage.FRENCH) "Tout supprimer" else "Delete All",
+            fontWeight = FontWeight.Bold
+          )
+        }
+      },
+      dismissButton = {
+        TextButton(onClick = { showClearHistoryDialog = false }) {
+          Text(AppStrings.cancelButton(language), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       }
     )

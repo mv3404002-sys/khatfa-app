@@ -522,6 +522,78 @@ object AppStrings {
     AppLanguage.FRENCH -> "Alerte immédiate à la fin du téléchargement"
   }
 
+  fun downloadPreferencesSection(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "خيارات التنزيل والأتمتة"
+    AppLanguage.ENGLISH -> "Download & Automation Settings"
+    AppLanguage.FRENCH -> "Téléchargement & Automatisation"
+  }
+
+  fun downloadPreferencesSubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "الجودة التلقائية، المعرض، وحفظ البيانات"
+    AppLanguage.ENGLISH -> "Auto-save, default quality, and network"
+    AppLanguage.FRENCH -> "Sauvegarde auto, qualité et réseau"
+  }
+
+  fun autoAnalyzeOnPasteTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "التحليل التلقائي فور اللصق"
+    AppLanguage.ENGLISH -> "Auto-Analyze on Paste"
+    AppLanguage.FRENCH -> "Analyse auto au collage"
+  }
+
+  fun autoAnalyzeOnPasteSubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "بدء استخراج الفيديو فورًا بمجرد الضغط على زر اللصق"
+    AppLanguage.ENGLISH -> "Start extracting media immediately upon tapping paste"
+    AppLanguage.FRENCH -> "Lancer l'analyse immédiatement après avoir collé"
+  }
+
+  fun autoExportGalleryTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "الحفظ التلقائي في المعرض"
+    AppLanguage.ENGLISH -> "Auto-Save to Gallery"
+    AppLanguage.FRENCH -> "Sauvegarde auto dans la galerie"
+  }
+
+  fun autoExportGallerySubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "نقل الوسائط تلقائيًا إلى استوديو الهاتف فور انتهاء التنزيل"
+    AppLanguage.ENGLISH -> "Automatically export media to device gallery when download finishes"
+    AppLanguage.FRENCH -> "Exporter automatiquement vers la galerie à la fin du téléchargement"
+  }
+
+  fun defaultQualitySubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "تحديد الجودة المفضلة مسبقًا عند فحص أي رابط جديد"
+    AppLanguage.ENGLISH -> "Pre-select preferred quality when inspecting any new video"
+    AppLanguage.FRENCH -> "Présélectionner la qualité lors de l'analyse d'un lien"
+  }
+
+  fun hapticFeedbackTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "الاهتزاز التفاعلي (Haptic Touch)"
+    AppLanguage.ENGLISH -> "Haptic Touch Feedback"
+    AppLanguage.FRENCH -> "Retour haptique"
+  }
+
+  fun hapticFeedbackSubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "استجابة اهتزازية لطيفة عند الضغط على الأزرار واكتمال التحميل"
+    AppLanguage.ENGLISH -> "Subtle vibration on button presses and download completion"
+    AppLanguage.FRENCH -> "Vibration tactile lors des clics et de la fin du téléchargement"
+  }
+
+  fun clearAllHistoryTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "مسح سجل التحميلات بالكامل"
+    AppLanguage.ENGLISH -> "Clear All Download History"
+    AppLanguage.FRENCH -> "Effacer tout l'historique"
+  }
+
+  fun clearAllHistorySubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "إفراغ قائمة التنزيلات وحذف ملفاتها لتوفير مساحة التخزين"
+    AppLanguage.ENGLISH -> "Wipe history entries and delete files to free up device storage"
+    AppLanguage.FRENCH -> "Effacer l'historique et supprimer les fichiers téléchargés"
+  }
+
+  fun clearAllHistoryConfirm(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "هل أنت متأكد من مسح جميع عناصر السجل وحذف ملفاتها بالكامل من الجهاز؟"
+    AppLanguage.ENGLISH -> "Are you sure you want to delete all history items and downloaded files?"
+    AppLanguage.FRENCH -> "Voulez-vous vraiment supprimer tout l'historique et les fichiers téléchargés ?"
+  }
+
   fun clearCacheTitle(lang: AppLanguage) = when (lang) {
     AppLanguage.ARABIC -> "تنظيف الذاكرة المؤقتة (Cache)"
     AppLanguage.ENGLISH -> "Clear Temporary Cache"

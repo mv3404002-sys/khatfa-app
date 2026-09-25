@@ -64,7 +64,8 @@ object KhatfaApiClient {
   const val BASE_URL = "https://khatfa-backend.onrender.com/"
 
   val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-    .connectTimeout(45, TimeUnit.SECONDS)
+    .connectionPool(okhttp3.ConnectionPool(8, 5, TimeUnit.MINUTES))
+    .connectTimeout(30, TimeUnit.SECONDS)
     .readTimeout(120, TimeUnit.SECONDS)
     .writeTimeout(60, TimeUnit.SECONDS)
     .retryOnConnectionFailure(true)
@@ -104,31 +105,37 @@ object KhatfaApiClient {
     val contentLength = body.contentLength()
 
     var inputStream: InputStream? = null
+    val bufferedOut = java.io.BufferedOutputStream(outputStream, 65536)
     var totalRead = 0L
+    var lastProgressUpdateMs = 0L
 
     return try {
-      inputStream = body.byteStream()
-      val buffer = ByteArray(8192)
+      inputStream = java.io.BufferedInputStream(body.byteStream(), 65536)
+      val buffer = ByteArray(65536)
       var bytesRead: Int
 
       while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-        outputStream.write(buffer, 0, bytesRead)
+        bufferedOut.write(buffer, 0, bytesRead)
         totalRead += bytesRead
-        val progress = if (contentLength > 0) {
-          (totalRead.toFloat() / contentLength).coerceIn(0f, 1f)
-        } else {
-          (totalRead.toFloat() / (totalRead + 1024 * 1024 * 5)).coerceIn(0.1f, 0.95f)
+        val now = System.currentTimeMillis()
+        if (now - lastProgressUpdateMs >= 100L) {
+          lastProgressUpdateMs = now
+          val progress = if (contentLength > 0) {
+            (totalRead.toFloat() / contentLength).coerceIn(0f, 1f)
+          } else {
+            (totalRead.toFloat() / (totalRead + 1024 * 1024 * 5)).coerceIn(0.1f, 0.95f)
+          }
+          onProgress(progress, totalRead, contentLength)
         }
-        onProgress(progress, totalRead, contentLength)
       }
-      outputStream.flush()
+      bufferedOut.flush()
       onProgress(1f, totalRead, if (contentLength > 0) contentLength else totalRead)
       Pair(true, totalRead)
     } catch (e: Exception) {
       Pair(false, totalRead)
     } finally {
       try { inputStream?.close() } catch (_: Exception) {}
-      try { outputStream.close() } catch (_: Exception) {}
+      try { bufferedOut.close() } catch (_: Exception) {}
     }
   }
 
@@ -147,28 +154,32 @@ object KhatfaApiClient {
     val contentLength = body.contentLength()
 
     var inputStream: InputStream? = null
-    var outputStream: FileOutputStream? = null
+    var bufferedOut: java.io.BufferedOutputStream? = null
+    var totalRead = 0L
+    var lastProgressUpdateMs = 0L
 
     return try {
-      inputStream = body.byteStream()
-      outputStream = FileOutputStream(destinationFile)
+      inputStream = java.io.BufferedInputStream(body.byteStream(), 65536)
+      bufferedOut = java.io.BufferedOutputStream(FileOutputStream(destinationFile), 65536)
 
-      val buffer = ByteArray(8192)
-      var totalRead = 0L
+      val buffer = ByteArray(65536)
       var bytesRead: Int
 
       while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-        outputStream.write(buffer, 0, bytesRead)
+        bufferedOut.write(buffer, 0, bytesRead)
         totalRead += bytesRead
-        val progress = if (contentLength > 0) {
-          (totalRead.toFloat() / contentLength).coerceIn(0f, 1f)
-        } else {
-          // indeterminate or unknown length: simulate gradual progression
-          (totalRead.toFloat() / (totalRead + 1024 * 1024 * 5)).coerceIn(0.1f, 0.95f)
+        val now = System.currentTimeMillis()
+        if (now - lastProgressUpdateMs >= 100L) {
+          lastProgressUpdateMs = now
+          val progress = if (contentLength > 0) {
+            (totalRead.toFloat() / contentLength).coerceIn(0f, 1f)
+          } else {
+            (totalRead.toFloat() / (totalRead + 1024 * 1024 * 5)).coerceIn(0.1f, 0.95f)
+          }
+          onProgress(progress, totalRead, contentLength)
         }
-        onProgress(progress, totalRead, contentLength)
       }
-      outputStream.flush()
+      bufferedOut.flush()
       onProgress(1f, totalRead, if (contentLength > 0) contentLength else totalRead)
       true
     } catch (e: Exception) {
@@ -178,7 +189,7 @@ object KhatfaApiClient {
       false
     } finally {
       try { inputStream?.close() } catch (_: Exception) {}
-      try { outputStream?.close() } catch (_: Exception) {}
+      try { bufferedOut?.close() } catch (_: Exception) {}
     }
   }
 }

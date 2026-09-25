@@ -17,8 +17,8 @@ android {
     applicationId = "com.aistudio.vidsnatch.kqrwvx"
     minSdk = 24
     targetSdk = 36
-    versionCode = 38
-    versionName = "3.8"
+    versionCode = 40
+    versionName = "4.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

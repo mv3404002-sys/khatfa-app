@@ -134,6 +134,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   private val _notificationsEnabled = MutableStateFlow(prefs.getBoolean("pref_notifications_enabled", true))
   val notificationsEnabled: StateFlow<Boolean> = _notificationsEnabled.asStateFlow()
 
+  private val _autoAnalyzeOnPaste = MutableStateFlow(prefs.getBoolean("pref_auto_analyze_paste", true))
+  val autoAnalyzeOnPaste: StateFlow<Boolean> = _autoAnalyzeOnPaste.asStateFlow()
+
+  private val _autoExportToGallery = MutableStateFlow(prefs.getBoolean("pref_auto_export_gallery", false))
+  val autoExportToGallery: StateFlow<Boolean> = _autoExportToGallery.asStateFlow()
+
+  private val _hapticFeedbackEnabled = MutableStateFlow(prefs.getBoolean("pref_haptic_feedback", true))
+  val hapticFeedbackEnabled: StateFlow<Boolean> = _hapticFeedbackEnabled.asStateFlow()
+
   // Download History Items (persisted via Room SQLite)
   private val _historyList = MutableStateFlow<List<DownloadedItem>>(emptyList())
   val historyList: StateFlow<List<DownloadedItem>> = _historyList.asStateFlow()
@@ -293,7 +302,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   }
 
   fun pasteUrl(pasted: String) {
-    _urlInput.value = pasted
+    val clean = pasted.trim()
+    _urlInput.value = clean
+    if (_autoAnalyzeOnPaste.value && clean.isNotBlank()) {
+      snatchVideo(clean)
+    }
   }
 
   private fun resolveExtAndMime(rawExt: String?, isAudioOnly: Boolean): Pair<String, String> {
@@ -416,7 +429,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
 
         val distinctQualities = qualitiesList.distinctBy { it.label }
-        val defaultSelectedId = distinctQualities.first().id
+        val preferredQuality = when {
+          _defaultQuality.value.contains("HD", ignoreCase = true) -> distinctQualities.firstOrNull { it.id == "hd_quality" }
+          _defaultQuality.value.contains("صوت", ignoreCase = true) || _defaultQuality.value.contains("audio", ignoreCase = true) -> distinctQualities.firstOrNull { it.id == "best_audio" }
+          else -> distinctQualities.firstOrNull { it.id == "best_phone" }
+        } ?: distinctQualities.first()
+        val defaultSelectedId = preferredQuality.id
 
         val parsedPreview = VideoPreviewData(
           id = UUID.randomUUID().toString(),
@@ -582,6 +600,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         // Immediately remove video/audio from Home interface & clear input
         _previewData.value = null
         _urlInput.value = ""
+
+        // Auto-export to gallery if user preference enabled
+        if (_autoExportToGallery.value) {
+          publishToGallery(newItem.id)
+        }
         
         // Auto-navigate to History tab
         _navigateToHistoryEvent.tryEmit(Unit)
@@ -839,6 +862,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   fun setNotificationsEnabled(enabled: Boolean) {
     _notificationsEnabled.value = enabled
     prefs.edit().putBoolean("pref_notifications_enabled", enabled).apply()
+  }
+
+  fun setAutoAnalyzeOnPaste(enabled: Boolean) {
+    _autoAnalyzeOnPaste.value = enabled
+    prefs.edit().putBoolean("pref_auto_analyze_paste", enabled).apply()
+  }
+
+  fun setAutoExportToGallery(enabled: Boolean) {
+    _autoExportToGallery.value = enabled
+    prefs.edit().putBoolean("pref_auto_export_gallery", enabled).apply()
+  }
+
+  fun setHapticFeedbackEnabled(enabled: Boolean) {
+    _hapticFeedbackEnabled.value = enabled
+    prefs.edit().putBoolean("pref_haptic_feedback", enabled).apply()
+  }
+
+  fun clearAllHistory(deleteFiles: Boolean = true) {
+    viewModelScope.launch(Dispatchers.IO) {
+      try {
+        val allItems = downloadRepository.getAllEntitiesSync()
+        if (deleteFiles) {
+          for (item in allItems) {
+            if (!item.localFilePath.isNullOrBlank()) {
+              try { File(item.localFilePath).delete() } catch (_: Exception) {}
+            }
+          }
+        }
+        for (item in allItems) {
+          downloadRepository.deleteById(item.id)
+        }
+        withContext(Dispatchers.Main) {
+          _snackbarMessage.value = if (_language.value == AppLanguage.ARABIC) "تم مسح سجل التحميلات بنجاح" else "History cleared successfully"
+        }
+      } catch (_: Exception) {}
+      updateRealCacheSize()
+    }
   }
 
   fun dismissSnackbar() {
