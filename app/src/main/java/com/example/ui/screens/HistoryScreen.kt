@@ -27,14 +27,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Headphones
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -72,12 +76,20 @@ import coil.compose.AsyncImage
 import com.example.localization.AppLanguage
 import com.example.localization.AppStrings
 import com.example.model.DownloadedItem
+import com.example.model.PlatformType
 import com.example.ui.components.EmptyStateCard
 import com.example.ui.components.InternalMediaPlayerModal
 import com.example.viewmodel.HistoryFilter
 import com.example.viewmodel.MainViewModel
 import java.io.File
 
+enum class VaultSortCriteria {
+  DATE_DESC,
+  SIZE_DESC,
+  NAME_ASC
+}
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HistoryScreen(
   viewModel: MainViewModel,
@@ -88,11 +100,39 @@ fun HistoryScreen(
   val activeFilter by viewModel.historyFilter.collectAsState()
   val language by viewModel.language.collectAsState()
 
-  val historyList = remember(rawHistoryList, activeFilter) {
-    when (activeFilter) {
-      HistoryFilter.ALL -> rawHistoryList
-      HistoryFilter.VIDEO -> rawHistoryList.filter { !it.isAudioOnly }
-      HistoryFilter.AUDIO -> rawHistoryList.filter { it.isAudioOnly }
+  var searchQuery by rememberSaveable { mutableStateOf("") }
+  var sortCriteria by rememberSaveable { mutableStateOf(VaultSortCriteria.DATE_DESC) }
+  var selectedPlatformFilter by rememberSaveable { mutableStateOf<PlatformType?>(null) }
+
+  val historyList = remember(rawHistoryList, activeFilter, searchQuery, sortCriteria, selectedPlatformFilter) {
+    var list = rawHistoryList
+
+    // 1. Filter by media type
+    list = when (activeFilter) {
+      HistoryFilter.ALL -> list
+      HistoryFilter.VIDEO -> list.filter { !it.isAudioOnly }
+      HistoryFilter.AUDIO -> list.filter { it.isAudioOnly }
+    }
+
+    // 2. Filter by platform
+    if (selectedPlatformFilter != null) {
+      list = list.filter { it.platform == selectedPlatformFilter }
+    }
+
+    // 3. Search query
+    if (searchQuery.isNotBlank()) {
+      val query = searchQuery.trim().lowercase()
+      list = list.filter {
+        it.title.lowercase().contains(query) ||
+        (it.author?.lowercase()?.contains(query) == true)
+      }
+    }
+
+    // 4. Sort
+    when (sortCriteria) {
+      VaultSortCriteria.DATE_DESC -> list
+      VaultSortCriteria.SIZE_DESC -> list.sortedByDescending { parseSizeToBytes(it.size) }
+      VaultSortCriteria.NAME_ASC -> list.sortedBy { it.title.lowercase() }
     }
   }
 
@@ -317,6 +357,158 @@ fun HistoryScreen(
       }
     }
 
+    // Search & Sort Bar
+    if (rawHistoryList.isNotEmpty()) {
+      item {
+        OutlinedTextField(
+          value = searchQuery,
+          onValueChange = { searchQuery = it },
+          placeholder = {
+            Text(
+              text = AppStrings.searchVaultPlaceholder(language),
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+          },
+          leadingIcon = {
+            Icon(
+              imageVector = Icons.Default.Search,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(20.dp)
+            )
+          },
+          trailingIcon = {
+            if (searchQuery.isNotBlank()) {
+              IconButton(onClick = { searchQuery = "" }) {
+                Icon(
+                  imageVector = Icons.Default.Close,
+                  contentDescription = if (language == AppLanguage.ARABIC) "مسح" else "Clear",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.size(18.dp)
+                )
+              }
+            }
+          },
+          singleLine = true,
+          shape = RoundedCornerShape(14.dp),
+          colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+          ),
+          modifier = Modifier
+            .fillMaxWidth()
+            .testTag("vault_search_field")
+        )
+      }
+
+      // Sort & Platform Options Row
+      item {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          // Sort Options
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.fillMaxWidth()
+          ) {
+            Icon(
+              imageVector = Icons.Default.Sort,
+              contentDescription = null,
+              tint = MaterialTheme.colorScheme.primary,
+              modifier = Modifier.size(18.dp)
+            )
+            Text(
+              text = AppStrings.sortByTitle(language) + ":",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            val sortItems = listOf(
+              Triple(VaultSortCriteria.DATE_DESC, AppStrings.sortByDate(language), "date"),
+              Triple(VaultSortCriteria.SIZE_DESC, AppStrings.sortBySize(language), "size"),
+              Triple(VaultSortCriteria.NAME_ASC, AppStrings.sortByName(language), "name")
+            )
+
+            sortItems.forEach { (crit, label, tag) ->
+              val isSelected = sortCriteria == crit
+              Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                border = androidx.compose.foundation.BorderStroke(
+                  1.dp,
+                  if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                ),
+                modifier = Modifier
+                  .clip(RoundedCornerShape(8.dp))
+                  .clickable { sortCriteria = crit }
+                  .testTag("sort_by_${tag}_button")
+              ) {
+                Text(
+                  text = label,
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                  color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp)
+                )
+              }
+            }
+          }
+
+          // Platform Filter Chips if multiple platforms exist
+          val platforms = remember(rawHistoryList) { rawHistoryList.map { it.platform }.distinct() }
+          if (platforms.size > 1) {
+            FlowRow(
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+              verticalArrangement = Arrangement.spacedBy(6.dp),
+              modifier = Modifier.fillMaxWidth()
+            ) {
+              Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = if (selectedPlatformFilter == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier
+                  .clip(RoundedCornerShape(8.dp))
+                  .clickable { selectedPlatformFilter = null }
+                  .testTag("filter_platform_all")
+              ) {
+                Text(
+                  text = if (language == AppLanguage.ARABIC) "كل المنصات" else "All Platforms",
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.Bold,
+                  color = if (selectedPlatformFilter == null) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+              }
+
+              platforms.forEach { platform ->
+                val isSelected = selectedPlatformFilter == platform
+                Surface(
+                  shape = RoundedCornerShape(8.dp),
+                  color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                  modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                      selectedPlatformFilter = if (isSelected) null else platform
+                    }
+                    .testTag("filter_platform_${platform.name.lowercase()}")
+                ) {
+                  Text(
+                    text = platform.getName(language),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     // Filter Chips Row
     if (rawHistoryList.isNotEmpty()) {
       item {
@@ -389,6 +581,14 @@ fun HistoryScreen(
                     onError = { errorMsg -> viewModel.showSnackbar(errorMsg) }
                   )
                 },
+                onOpenWith = {
+                  openWithExternalApp(
+                    context = context,
+                    item = item,
+                    language = language,
+                    onError = { errorMsg -> viewModel.showSnackbar(errorMsg) }
+                  )
+                },
                 onDelete = { itemToDelete = item }
               )
             }
@@ -414,6 +614,14 @@ fun HistoryScreen(
           },
           onShare = {
             shareMediaItem(
+              context = context,
+              item = item,
+              language = language,
+              onError = { errorMsg -> viewModel.showSnackbar(errorMsg) }
+            )
+          },
+          onOpenWith = {
+            openWithExternalApp(
               context = context,
               item = item,
               language = language,
@@ -490,6 +698,7 @@ private fun CleanHistoryCard(
   onPublishToGallery: () -> Unit,
   onRename: () -> Unit,
   onShare: () -> Unit,
+  onOpenWith: () -> Unit,
   onDelete: () -> Unit
 ) {
   Card(
@@ -519,7 +728,7 @@ private fun CleanHistoryCard(
           modifier = Modifier
             .size(86.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF1E1714))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp))
             .clickable { onPlay() }
         ) {
@@ -838,6 +1047,27 @@ private fun CleanHistoryCard(
           }
         }
 
+        // 5. Open With Button (External App)
+        Surface(
+          shape = RoundedCornerShape(12.dp),
+          color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+          border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+          modifier = Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onOpenWith() }
+            .testTag("open_with_button_${item.id}")
+        ) {
+          Box(contentAlignment = Alignment.Center) {
+            Icon(
+              imageVector = Icons.Default.OpenInNew,
+              contentDescription = AppStrings.openWithAction(language),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(18.dp)
+            )
+          }
+        }
+
         // 4. Delete Button
         Surface(
           shape = RoundedCornerShape(12.dp),
@@ -871,6 +1101,7 @@ private fun CleanGridHistoryCard(
   onPublishToGallery: () -> Unit,
   onRename: () -> Unit,
   onShare: () -> Unit,
+  onOpenWith: () -> Unit,
   onDelete: () -> Unit
 ) {
   Card(
@@ -892,7 +1123,7 @@ private fun CleanGridHistoryCard(
           .fillMaxWidth()
           .height(115.dp)
           .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
-          .background(Color(0xFF1E1714))
+          .background(MaterialTheme.colorScheme.surfaceVariant)
           .clickable { onPlay() }
       ) {
         if (!item.thumbnailUrl.isNullOrBlank()) {
@@ -1086,6 +1317,18 @@ private fun CleanGridHistoryCard(
           }
 
           IconButton(
+            onClick = onOpenWith,
+            modifier = Modifier.size(28.dp)
+          ) {
+            Icon(
+              imageVector = Icons.Default.OpenInNew,
+              contentDescription = AppStrings.openWithAction(language),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.size(15.dp)
+            )
+          }
+
+          IconButton(
             onClick = onDelete,
             modifier = Modifier.size(28.dp)
           ) {
@@ -1152,4 +1395,73 @@ private fun shareMediaItem(
   } catch (_: Exception) {
     onError(AppStrings.mediaFileNotFound(language))
   }
+}
+
+private fun openWithExternalApp(
+  context: Context,
+  item: DownloadedItem,
+  language: AppLanguage,
+  onError: (String) -> Unit
+) {
+  val mime = item.mimeType ?: if (item.isAudioOnly) "audio/*" else "video/*"
+  var openUri: Uri? = null
+
+  if (!item.contentUri.isNullOrBlank()) {
+    try {
+      openUri = Uri.parse(item.contentUri)
+    } catch (_: Exception) {}
+  }
+
+  if (openUri == null && !item.localFilePath.isNullOrBlank()) {
+    val file = File(item.localFilePath)
+    if (file.exists() && file.length() > 0) {
+      try {
+        openUri = FileProvider.getUriForFile(
+          context,
+          "${context.packageName}.fileprovider",
+          file
+        )
+      } catch (_: Exception) {
+        openUri = Uri.fromFile(file)
+      }
+    }
+  }
+
+  if (openUri == null) {
+    onError(AppStrings.mediaFileNotFound(language))
+    return
+  }
+
+  val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+    setDataAndType(openUri, mime)
+    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+  }
+
+  try {
+    val chooser = Intent.createChooser(viewIntent, item.title).apply {
+      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    context.startActivity(chooser)
+  } catch (_: Exception) {
+    onError("تعذر فتح التطبيق الخارجي")
+  }
+}
+
+private fun parseSizeToBytes(sizeStr: String): Long {
+  try {
+    val clean = sizeStr.trim()
+    val parts = clean.split(" ")
+    if (parts.size >= 2) {
+      val num = parts[0].toDoubleOrNull() ?: return 0L
+      val unit = parts[1].uppercase()
+      return when {
+        unit.startsWith("G") -> (num * 1024 * 1024 * 1024).toLong()
+        unit.startsWith("M") -> (num * 1024 * 1024).toLong()
+        unit.startsWith("K") -> (num * 1024).toLong()
+        else -> num.toLong()
+      }
+    }
+  } catch (_: Exception) {}
+  return 0L
 }

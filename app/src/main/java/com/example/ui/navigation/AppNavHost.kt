@@ -29,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.ui.screens.DiagnosticsScreen
 import com.example.ui.screens.HistoryScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.SettingsScreen
@@ -160,7 +161,16 @@ fun MainAppContainer(
         }
         composable(Screen.Settings.route) {
           SettingsScreen(
-            viewModel = viewModel
+            viewModel = viewModel,
+            onNavigateToDiagnostics = {
+              navController.navigate("diagnostics")
+            }
+          )
+        }
+        composable("diagnostics") {
+          DiagnosticsScreen(
+            viewModel = viewModel,
+            onBack = { navController.popBackStack() }
           )
         }
       }

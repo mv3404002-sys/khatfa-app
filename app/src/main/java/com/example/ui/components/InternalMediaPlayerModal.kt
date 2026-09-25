@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import android.app.Activity
+import android.content.Context
 import android.net.Uri
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
@@ -182,7 +183,11 @@ fun InternalMediaPlayerModal(
   var showInfoDialog by remember { mutableStateOf(false) }
   var dragOffsetY by remember { mutableFloatStateOf(0f) }
 
-  var playbackSpeed by remember { mutableFloatStateOf(1.0f) }
+  val defaultInitialSpeed = remember(context) {
+    context.getSharedPreferences("khatif_user_settings", Context.MODE_PRIVATE)
+      .getFloat("pref_default_playback_speed", 1.0f)
+  }
+  var playbackSpeed by remember { mutableFloatStateOf(defaultInitialSpeed) }
   var isLooping by remember { mutableStateOf(false) }
 
   val isInPip by PipManager.isInPipMode.collectAsState()

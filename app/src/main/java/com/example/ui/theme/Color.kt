@@ -2,69 +2,83 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Soothing Warm Sienna, Deep Walnut & Calm Linen Palette (Completely Eye-Comfortable, Zero Yellow Glare)
-val SoothingPrimary = Color(0xFF8E4E28)          // Deep Warm Terracotta / Rich Cinnamon Sienna
-val SoothingPrimaryLight = Color(0xFFA86338)     // Soft Warm Terracotta
-val SoothingPrimaryDark = Color(0xFF6B3516)      // Deep Burnished Chestnut
+// Tech Accent: Electric Cyan (خاطف - السرعة والتقنية الحديثة)
+val TechAccentCyan = Color(0xFF00E5FF)
+val TechAccentCyanLight = Color(0xFF70F3FF)
+val TechAccentCyanDark = Color(0xFF00A0B2)
 
-// Calming Neutrals (Linen / Soft Warm Stone - Gentle on the Eyes)
-val NeutralWarmLinen = Color(0xFFF6F3EE)        // Soft Warm Off-White / Natural Linen
-val NeutralWarmSurface = Color(0xFFFFFFFF)      // Pure Clean Card
-val NeutralWarmSurfaceMuted = Color(0xFFEFECE5) // Soft Muted Stone
-val NeutralBorderLight = Color(0xFFDDD7CD)      // Gentle Inlay Border
+// Obsidian Black Base (#0B0C0E)
+val ObsidianBackground = Color(0xFF0B0C0E)
+val ObsidianSurface = Color(0xFF13151A)
+val ObsidianSurfaceVariant = Color(0xFF191D26)
+val ObsidianSurfaceElevated = Color(0xFF202632)
+val ObsidianBorder = Color(0xFF2A313E)
+val ObsidianBorderSubtle = Color(0xFF1B202A)
 
-// Dark Mode Eye-Safe Walnut / Espresso Charcoal
-val DarkEspressoBackground = Color(0xFF15110E)  // Deep Calming Espresso
-val DarkEspressoSurface = Color(0xFF1F1915)     // Soft Charcoal Timber
-val DarkEspressoSurfaceMuted = Color(0xFF2A221C)// Muted Dark Warm Stone
-val DarkBorderMuted = Color(0xFF3E322A)         // Soft Border (No Glare)
-val DarkTextSilk = Color(0xFFF3EFEA)            // Soft Cream Silk Text
-val DarkTextMuted = Color(0xFFAEA399)           // Calming Secondary Text
+// Text Colors (Dark Mode)
+val ObsidianTextPrimary = Color(0xFFF1F5F9)
+val ObsidianTextSecondary = Color(0xFF94A3B8)
+val ObsidianTextMuted = Color(0xFF64748B)
 
-// Light Theme Colors (Warm Organic & Eye-Friendly)
-val LightPrimary = Color(0xFF8E4E28)            // Calm Warm Terracotta
+// Dark Theme Material 3 ColorScheme Tokens
+val DarkPrimary = Color(0xFF00E5FF)               // Electric Cyan Accent
+val DarkOnPrimary = Color(0xFF00363D)
+val DarkPrimaryContainer = Color(0xFF0D2F36)      // Subtle Neon Cyan Tinted Chamber
+val DarkOnPrimaryContainer = Color(0xFFA5F7FF)
+val DarkSecondary = Color(0xFF72DCE5)
+val DarkOnSecondary = Color(0xFF00373C)
+val DarkSecondaryContainer = Color(0xFF173238)
+val DarkOnSecondaryContainer = Color(0xFFC0F4F8)
+val DarkTertiary = Color(0xFF38BDF8)             // Vivid Cyber Azure
+val DarkOnTertiary = Color(0xFF00354E)
+val DarkBackground = Color(0xFF0B0C0E)           // Pure Obsidian Black requested
+val DarkOnBackground = Color(0xFFF1F5F9)
+val DarkSurface = Color(0xFF13151A)              // Deep Obsidian Card
+val DarkOnSurface = Color(0xFFF1F5F9)
+val DarkSurfaceVariant = Color(0xFF191D26)       // Obsidian Component Container
+val DarkOnSurfaceVariant = Color(0xFF94A3B8)     // Crisp Cool Slate Text
+val DarkOutline = Color(0xFF263040)              // Subtle High-Tech Wireframe
+val DarkOutlineVariant = Color(0xFF1A212D)
+
+// Light Theme Material 3 ColorScheme Tokens
+val LightPrimary = Color(0xFF007A8A)             // Deep Oceanic Cyan
 val LightOnPrimary = Color(0xFFFFFFFF)
-val LightPrimaryContainer = Color(0xFFF0E4DA)   // Soft Pale Terracotta Linen (Gentle & Comfortable)
-val LightOnPrimaryContainer = Color(0xFF331608)
-val LightSecondary = Color(0xFF5B4336)          // Warm Walnut Brown
+val LightPrimaryContainer = Color(0xFFC8F5FA)
+val LightOnPrimaryContainer = Color(0xFF001F24)
+val LightSecondary = Color(0xFF3B686E)
 val LightOnSecondary = Color(0xFFFFFFFF)
-val LightSecondaryContainer = Color(0xFFEADFD7)
-val LightOnSecondaryContainer = Color(0xFF23140C)
-val LightTertiary = Color(0xFF704B38)           // Warm Nutmeg
+val LightSecondaryContainer = Color(0xFFD6EFF2)
+val LightOnSecondaryContainer = Color(0xFF051F22)
+val LightTertiary = Color(0xFF0284C7)
 val LightOnTertiary = Color(0xFFFFFFFF)
-val LightBackground = Color(0xFFF7F4EE)         // Gentle Linen Cream (Restful for the Eyes)
-val LightOnBackground = Color(0xFF1E1612)       // Deep Soft Charcoal Espresso
+val LightBackground = Color(0xFFF8FAFC)          // Minimal Slate Frost
+val LightOnBackground = Color(0xFF0F172A)
 val LightSurface = Color(0xFFFFFFFF)
-val LightOnSurface = Color(0xFF1E1612)
-val LightSurfaceVariant = Color(0xFFECE6DD)     // Muted Warm Stone
-val LightOnSurfaceVariant = Color(0xFF54463F)
-val LightOutline = Color(0xFFD6CDC1)            // Soft Subtle Stroke
-val LightOutlineVariant = Color(0xFFE6E0D6)
-
-// Dark Theme Colors (Gentle Espresso Charcoal with Soft Warm Terracotta)
-val DarkPrimary = Color(0xFFD48B5D)             // Soft Warm Terracotta Amber (Subdued, Non-glaring)
-val DarkOnPrimary = Color(0xFF261005)
-val DarkPrimaryContainer = Color(0xFF3D2316)     // Deep Soft Walnut
-val DarkOnPrimaryContainer = Color(0xFFF7E7DE)
-val DarkSecondary = Color(0xFFC0A696)           // Muted Warm Oat
-val DarkOnSecondary = Color(0xFF22150E)
-val DarkSecondaryContainer = Color(0xFF3B2B23)
-val DarkOnSecondaryContainer = Color(0xFFEDE0D8)
-val DarkTertiary = Color(0xFFB58064)            // Soft Cinnamon Wood
-val DarkOnTertiary = Color(0xFF24130A)
-val DarkBackground = Color(0xFF14100D)          // Deep Eye-Safe Espresso Obsidian
-val DarkOnBackground = Color(0xFFF2ECE6)        // Soft Off-White Silk
-val DarkSurface = Color(0xFF1D1714)             // Dark Warm Charcoal Walnut
-val DarkOnSurface = Color(0xFFF2ECE6)
-val DarkSurfaceVariant = Color(0xFF2B221D)      // Muted Warm Shadow
-val DarkOnSurfaceVariant = Color(0xFFAFA299)
-val DarkOutline = Color(0xFF473A32)             // Soft Line
-val DarkOutlineVariant = Color(0xFF352A23)
+val LightOnSurface = Color(0xFF0F172A)
+val LightSurfaceVariant = Color(0xFFEDF2F7)
+val LightOnSurfaceVariant = Color(0xFF475569)
+val LightOutline = Color(0xFFCBD5E1)
+val LightOutlineVariant = Color(0xFFE2E8F0)
 
 // Platform Specific Accents
-val YouTubeRed = Color(0xFFCC181E)
-val TikTokCyan = Color(0xFF00D1DC)
-val TikTokBlack = Color(0xFF1E1410)
-val InstagramPurple = Color(0xFFB82779)
+val YouTubeRed = Color(0xFFFF0033)
+val TikTokCyan = Color(0xFF00F2FE)
+val TikTokBlack = Color(0xFF13151A)
+val InstagramPurple = Color(0xFFE1306C)
 val FacebookBlue = Color(0xFF1877F2)
-val TwitterBlack = Color(0xFF261914)
+val TwitterBlack = Color(0xFF13151A)
+
+// Legacy alias mappings for backward-compatibility
+val SoothingPrimary = DarkPrimary
+val SoothingPrimaryLight = TechAccentCyanLight
+val SoothingPrimaryDark = TechAccentCyanDark
+val NeutralWarmLinen = LightBackground
+val NeutralWarmSurface = LightSurface
+val NeutralWarmSurfaceMuted = LightSurfaceVariant
+val NeutralBorderLight = LightOutline
+val DarkEspressoBackground = DarkBackground
+val DarkEspressoSurface = DarkSurface
+val DarkEspressoSurfaceMuted = DarkSurfaceVariant
+val DarkBorderMuted = DarkOutline
+val DarkTextSilk = DarkOnBackground
+val DarkTextMuted = DarkOnSurfaceVariant

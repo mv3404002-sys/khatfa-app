@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.ContentValues
 import android.content.Context
 import android.media.MediaScannerConnection
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -38,6 +40,8 @@ import retrofit2.HttpException
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
@@ -91,10 +95,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   private val downloadRepository = DownloadRepository(database.downloadedItemDao())
 
   private val _themeMode = MutableStateFlow(
-    when (prefs.getString("pref_theme_mode", "SYSTEM")) {
-      "DARK" -> ThemeMode.DARK
+    when (prefs.getString("pref_theme_mode", "DARK")) {
       "LIGHT" -> ThemeMode.LIGHT
-      else -> ThemeMode.SYSTEM
+      "SYSTEM" -> ThemeMode.SYSTEM
+      else -> ThemeMode.DARK
     }
   )
   val themeMode: StateFlow<ThemeMode> = _themeMode.asStateFlow()
@@ -124,6 +128,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
   private val _defaultQuality = MutableStateFlow(prefs.getString("pref_default_quality", "أفضل جودة (تلقائي / Best)") ?: "أفضل جودة (تلقائي / Best)")
   val defaultQuality: StateFlow<String> = _defaultQuality.asStateFlow()
+
+  private val _defaultPlaybackSpeed = MutableStateFlow(prefs.getFloat("pref_default_playback_speed", 1.0f))
+  val defaultPlaybackSpeed: StateFlow<Float> = _defaultPlaybackSpeed.asStateFlow()
+
+  private val _lastBackendCheckTime = MutableStateFlow<String?>(null)
+  val lastBackendCheckTime: StateFlow<String?> = _lastBackendCheckTime.asStateFlow()
 
   private val _cacheSize = MutableStateFlow("0.0 MB")
   val cacheSize: StateFlow<String> = _cacheSize.asStateFlow()
@@ -278,6 +288,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
       } catch (_: Exception) {
         _backendStatus.value = BackendConnectionStatus.OFFLINE
+      } finally {
+        val sdf = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        _lastBackendCheckTime.value = sdf.format(Date())
       }
     }
   }
@@ -475,6 +488,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   fun startDownload() {
     val preview = _previewData.value ?: return
     if (_isDownloading.value) return
+
+    val app = getApplication<Application>()
+
+    // Wi-Fi only check (Requirement 1)
+    if (_wifiOnly.value) {
+      val cm = app.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+      val activeNet = cm?.activeNetwork
+      val caps = cm?.getNetworkCapabilities(activeNet)
+      val isWifi = caps?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+      if (!isWifi) {
+        _snackbarMessage.value = when (_language.value) {
+          AppLanguage.ARABIC -> "تم إيقاف التنزيل: ميزة التحميل عبر Wi-Fi فقط مفعّلة في الإعدادات"
+          AppLanguage.ENGLISH -> "Download paused: Wi-Fi only mode is enabled in Settings"
+          AppLanguage.FRENCH -> "Téléchargement suspendu : Wi-Fi uniquement activé"
+        }
+        return
+      }
+    }
 
     val selectedQuality = preview.availableQualities.firstOrNull { it.id == preview.selectedQualityId }
       ?: preview.availableQualities.first()
@@ -857,6 +888,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
   fun setWifiOnly(enabled: Boolean) {
     _wifiOnly.value = enabled
     prefs.edit().putBoolean("pref_wifi_only", enabled).apply()
+  }
+
+  fun setDefaultPlaybackSpeed(speed: Float) {
+    _defaultPlaybackSpeed.value = speed
+    prefs.edit().putFloat("pref_default_playback_speed", speed).apply()
   }
 
   fun setNotificationsEnabled(enabled: Boolean) {

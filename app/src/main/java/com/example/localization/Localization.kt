@@ -34,9 +34,9 @@ object AppStrings {
   }
 
   fun historyTab(lang: AppLanguage) = when (lang) {
-    AppLanguage.ARABIC -> "التحميلات"
-    AppLanguage.ENGLISH -> "Downloads"
-    AppLanguage.FRENCH -> "Historique"
+    AppLanguage.ARABIC -> "الخزنة"
+    AppLanguage.ENGLISH -> "Vault"
+    AppLanguage.FRENCH -> "Coffre"
   }
 
   fun settingsTab(lang: AppLanguage) = when (lang) {
@@ -132,9 +132,9 @@ object AppStrings {
 
   // History Screen
   fun historyTitle(lang: AppLanguage) = when (lang) {
-    AppLanguage.ARABIC -> "سجل التنزيلات"
-    AppLanguage.ENGLISH -> "Downloads History"
-    AppLanguage.FRENCH -> "Historique des téléchargements"
+    AppLanguage.ARABIC -> "الخزنة"
+    AppLanguage.ENGLISH -> "Vault"
+    AppLanguage.FRENCH -> "Coffre"
   }
 
   fun totalDownloadsLabel(lang: AppLanguage, count: Int) = when (lang) {
@@ -150,9 +150,9 @@ object AppStrings {
   }
 
   fun historyEmptyTitle(lang: AppLanguage) = when (lang) {
-    AppLanguage.ARABIC -> "السجل فارغ"
-    AppLanguage.ENGLISH -> "History is Empty"
-    AppLanguage.FRENCH -> "L'historique est vide"
+    AppLanguage.ARABIC -> "الخزنة فارغة"
+    AppLanguage.ENGLISH -> "Vault is Empty"
+    AppLanguage.FRENCH -> "Le coffre est vide"
   }
 
   fun historyEmptyDesc(lang: AppLanguage) = when (lang) {
@@ -993,9 +993,9 @@ object AppStrings {
   }
 
   fun backToHistory(lang: AppLanguage) = when (lang) {
-    AppLanguage.ARABIC -> "العودة للسجل"
-    AppLanguage.ENGLISH -> "Back to History"
-    AppLanguage.FRENCH -> "Retour à l'historique"
+    AppLanguage.ARABIC -> "العودة إلى الخزنة"
+    AppLanguage.ENGLISH -> "Back to Vault"
+    AppLanguage.FRENCH -> "Retour au coffre"
   }
 
   fun gridView(lang: AppLanguage) = when (lang) {
@@ -1204,5 +1204,103 @@ object AppStrings {
     AppLanguage.ARABIC -> "جاري التشغيل في الخلفية"
     AppLanguage.ENGLISH -> "Playing in Background"
     AppLanguage.FRENCH -> "Lecture en arrière-plan"
+  }
+
+  // Diagnostics & System
+  fun diagnosticsTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "تشخيص النظام"
+    AppLanguage.ENGLISH -> "System Diagnostics"
+    AppLanguage.FRENCH -> "Diagnostic du système"
+  }
+
+  fun diagnosticsSubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "فحص حالة الاتصال بالخدمة ومساحة تخزين الجهاز"
+    AppLanguage.ENGLISH -> "Check service connectivity and device storage"
+    AppLanguage.FRENCH -> "Vérifier la connectivité du service et le stockage"
+  }
+
+  fun serviceStatusLabel(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "حالة الاتصال بالخدمة"
+    AppLanguage.ENGLISH -> "Service Connection Status"
+    AppLanguage.FRENCH -> "État de connexion du service"
+  }
+
+  fun lastCheckTimeLabel(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "وقت آخر فحص"
+    AppLanguage.ENGLISH -> "Last Checked Time"
+    AppLanguage.FRENCH -> "Heure de dernière vérification"
+  }
+
+  fun runCheckButton(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "إعادة الفحص الآن"
+    AppLanguage.ENGLISH -> "Check Now"
+    AppLanguage.FRENCH -> "Vérifier maintenant"
+  }
+
+  fun storageStatusLabel(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "حالة التخزين المتاح على الجهاز"
+    AppLanguage.ENGLISH -> "Available Device Storage"
+    AppLanguage.FRENCH -> "Stockage disponible sur l'appareil"
+  }
+
+  fun storageAvailable(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "متاح"
+    AppLanguage.ENGLISH -> "Available"
+    AppLanguage.FRENCH -> "Disponible"
+  }
+
+  fun storageTotal(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "السعة الإجمالية"
+    AppLanguage.ENGLISH -> "Total"
+    AppLanguage.FRENCH -> "Total"
+  }
+
+  // Vault Search & Sort
+  fun searchVaultPlaceholder(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "البحث بالاسم في الخزنة..."
+    AppLanguage.ENGLISH -> "Search vault by title..."
+    AppLanguage.FRENCH -> "Rechercher dans le coffre..."
+  }
+
+  fun sortByTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "الترتيب حسب"
+    AppLanguage.ENGLISH -> "Sort by"
+    AppLanguage.FRENCH -> "Trier par"
+  }
+
+  fun sortByDate(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "التاريخ (الأحدث)"
+    AppLanguage.ENGLISH -> "Date (Newest)"
+    AppLanguage.FRENCH -> "Date (Plus récent)"
+  }
+
+  fun sortBySize(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "الحجم (الأكبر)"
+    AppLanguage.ENGLISH -> "Size (Largest)"
+    AppLanguage.FRENCH -> "Taille (Plus grand)"
+  }
+
+  fun sortByName(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "الاسم (أبجدياً)"
+    AppLanguage.ENGLISH -> "Name (A-Z)"
+    AppLanguage.FRENCH -> "Nom (A-Z)"
+  }
+
+  fun openWithAction(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "فتح بواسطة تطبيق آخر"
+    AppLanguage.ENGLISH -> "Open with external app"
+    AppLanguage.FRENCH -> "Ouvrir avec une application"
+  }
+
+  fun defaultPlaybackSpeedTitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "سرعة التشغيل الافتراضية"
+    AppLanguage.ENGLISH -> "Default Playback Speed"
+    AppLanguage.FRENCH -> "Vitesse de lecture par défaut"
+  }
+
+  fun defaultPlaybackSpeedSubtitle(lang: AppLanguage) = when (lang) {
+    AppLanguage.ARABIC -> "السرعة الأولية المعتمدة عند فتح أي مقطع"
+    AppLanguage.ENGLISH -> "Initial playback rate for video and audio"
+    AppLanguage.FRENCH -> "Vitesse initiale pour la lecture vidéo et audio"
   }
 }

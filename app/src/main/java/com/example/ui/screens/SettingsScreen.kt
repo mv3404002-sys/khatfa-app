@@ -49,7 +49,9 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
@@ -97,6 +99,7 @@ import com.example.viewmodel.MainViewModel
 @Composable
 fun SettingsScreen(
   viewModel: MainViewModel,
+  onNavigateToDiagnostics: () -> Unit = {},
   modifier: Modifier = Modifier
 ) {
   val themeMode by viewModel.themeMode.collectAsState()
@@ -109,12 +112,14 @@ fun SettingsScreen(
   val autoAnalyzeOnPaste by viewModel.autoAnalyzeOnPaste.collectAsState()
   val autoExportToGallery by viewModel.autoExportToGallery.collectAsState()
   val defaultQuality by viewModel.defaultQuality.collectAsState()
+  val defaultPlaybackSpeed by viewModel.defaultPlaybackSpeed.collectAsState()
   val hapticFeedbackEnabled by viewModel.hapticFeedbackEnabled.collectAsState()
 
   // Interactive Dialog & Expand States
   var showClearCacheDialog by remember { mutableStateOf(false) }
   var showClearHistoryDialog by remember { mutableStateOf(false) }
   var showDefaultQualityDialog by remember { mutableStateOf(false) }
+  var showPlaybackSpeedDialog by remember { mutableStateOf(false) }
   var showPrivacyDialog by remember { mutableStateOf(false) }
   var isAppearanceExpanded by remember { mutableStateOf(false) }
   var isFontSizeExpanded by remember { mutableStateOf(false) }
@@ -454,6 +459,17 @@ fun SettingsScreen(
 
           HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
 
+          // Default Playback Speed
+          SettingDetailRow(
+            icon = Icons.Default.Speed,
+            title = AppStrings.defaultPlaybackSpeedTitle(language),
+            subtitle = "${defaultPlaybackSpeed}x",
+            action = if (language == AppLanguage.ARABIC) "تحديد" else if (language == AppLanguage.FRENCH) "Choisir" else "Select",
+            onClick = { showPlaybackSpeedDialog = true }
+          )
+
+          HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+
           // Wi-Fi Only Download
           SettingSwitchRow(
             icon = Icons.Default.Wifi,
@@ -631,17 +647,17 @@ fun SettingsScreen(
 
           HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 
-          // 3. خادم التحميل السحابي
+          // 3. تشخيص النظام والخدمة
           SettingDetailRow(
             icon = Icons.Default.Cloud,
-            title = if (language == AppLanguage.ARABIC) "خادم التحميل السحابي" else if (language == AppLanguage.FRENCH) "Serveur Cloud" else "Cloud Download Server",
-            subtitle = "khatfa-backend.onrender.com",
-            action = when (backendStatus) {
-              BackendConnectionStatus.ONLINE -> if (language == AppLanguage.ARABIC) "متصل ✓" else if (language == AppLanguage.FRENCH) "Connecté ✓" else "Online ✓"
-              BackendConnectionStatus.CHECKING -> if (language == AppLanguage.ARABIC) "جاري الفحص..." else if (language == AppLanguage.FRENCH) "Vérification..." else "Checking..."
-              BackendConnectionStatus.OFFLINE -> if (language == AppLanguage.ARABIC) "فحص مجددًا" else if (language == AppLanguage.FRENCH) "Réessayer" else "Retry"
+            title = AppStrings.diagnosticsTitle(language),
+            subtitle = when (backendStatus) {
+              BackendConnectionStatus.ONLINE -> if (language == AppLanguage.ARABIC) "الخدمة متصلة بنجاح ✓" else "Service Connected ✓"
+              BackendConnectionStatus.CHECKING -> if (language == AppLanguage.ARABIC) "جاري التحقق من الخدمة..." else "Checking Service..."
+              BackendConnectionStatus.OFFLINE -> if (language == AppLanguage.ARABIC) "الخدمة غير متصلة" else "Service Offline"
             },
-            onClick = { viewModel.checkBackendHealth() }
+            action = if (language == AppLanguage.ARABIC) "تشخيص" else "Diagnose",
+            onClick = { onNavigateToDiagnostics() }
           )
         }
       }
@@ -819,9 +835,12 @@ fun SettingsScreen(
   // --- INTERACTIVE DIALOG: Default Download Quality Selector ---
   if (showDefaultQualityDialog) {
     val qualityOptions = listOf(
-      "أفضل جودة للهاتف (Best)" to "أفضل جودة للهاتف (Best)",
-      "جودة HD (720p / 1080p)" to "HD",
-      "صوت فقط (Audio M4A)" to "صوت فقط"
+      "أفضل جودة (تلقائي / Best)" to "أفضل جودة",
+      "1080p Full HD" to "1080p",
+      "720p HD" to "720p",
+      "480p SD" to "480p",
+      "360p Standard" to "360p",
+      "صوت فقط (Audio Only)" to "صوت فقط"
     )
 
     AlertDialog(
@@ -891,6 +910,82 @@ fun SettingsScreen(
       },
       confirmButton = {
         TextButton(onClick = { showDefaultQualityDialog = false }) {
+          Text(AppStrings.cancelButton(language))
+        }
+      }
+    )
+  }
+
+  // --- INTERACTIVE DIALOG: Default Playback Speed Selector ---
+  if (showPlaybackSpeedDialog) {
+    val speedOptions = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f)
+    AlertDialog(
+      onDismissRequest = { showPlaybackSpeedDialog = false },
+      icon = {
+        Icon(
+          imageVector = Icons.Default.Speed,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.primary,
+          modifier = Modifier.size(32.dp)
+        )
+      },
+      title = {
+        Text(
+          text = AppStrings.defaultPlaybackSpeedTitle(language),
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold
+        )
+      },
+      text = {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          Text(
+            text = AppStrings.defaultPlaybackSpeedSubtitle(language),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+          )
+          speedOptions.forEach { speed ->
+            val isSelected = defaultPlaybackSpeed == speed
+            Surface(
+              shape = RoundedCornerShape(10.dp),
+              color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+              border = androidx.compose.foundation.BorderStroke(
+                1.dp,
+                if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+              ),
+              modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .clickable {
+                  viewModel.setDefaultPlaybackSpeed(speed)
+                  showPlaybackSpeedDialog = false
+                }
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+              ) {
+                RadioButton(
+                  selected = isSelected,
+                  onClick = {
+                    viewModel.setDefaultPlaybackSpeed(speed)
+                    showPlaybackSpeedDialog = false
+                  },
+                  colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                )
+                Text(
+                  text = "${speed}x" + if (speed == 1.0f) " (عادي / Normal)" else "",
+                  style = MaterialTheme.typography.bodyMedium,
+                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                  color = MaterialTheme.colorScheme.onSurface
+                )
+              }
+            }
+          }
+        }
+      },
+      confirmButton = {
+        TextButton(onClick = { showPlaybackSpeedDialog = false }) {
           Text(AppStrings.cancelButton(language))
         }
       }

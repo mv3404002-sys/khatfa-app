@@ -1,10 +1,12 @@
 package com.example.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import com.example.localization.AppLanguage
 
 enum class ThemeMode {
@@ -59,15 +61,15 @@ private val LightColorScheme =
 
 @Composable
 fun VidSnatchTheme(
-  themeMode: ThemeMode = ThemeMode.SYSTEM,
+  themeMode: ThemeMode = ThemeMode.DARK,
   language: AppLanguage = AppLanguage.ARABIC,
   fontScale: Float = 1.05f,
   content: @Composable () -> Unit
 ) {
   val isDark = when (themeMode) {
-    ThemeMode.SYSTEM -> isSystemInDarkTheme()
     ThemeMode.LIGHT -> false
     ThemeMode.DARK -> true
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
   }
   val colorScheme = if (isDark) DarkColorScheme else LightColorScheme
   val typography = getAppTypography(language = language, fontScale = fontScale)
@@ -76,9 +78,8 @@ fun VidSnatchTheme(
     colorScheme = colorScheme,
     typography = typography
   ) {
-    val defaultFont = if (language == AppLanguage.ARABIC) CairoFontFamily else OutfitFontFamily
-    androidx.compose.runtime.CompositionLocalProvider(
-      androidx.compose.material3.LocalTextStyle provides typography.bodyLarge.copy(fontFamily = defaultFont),
+    CompositionLocalProvider(
+      LocalTextStyle provides typography.bodyLarge.copy(fontFamily = IbmPlexSansArabicFontFamily),
       content = content
     )
   }
